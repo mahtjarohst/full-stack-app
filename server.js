@@ -11,12 +11,18 @@ const app = express();
 app.use(express.static("static"));
 
 const pool = new pg.Pool({
-  connectionString: DATABASE_URL,
+  connectionString: process.env.DATABASE_URL,
   ssl: NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
 
 app.get("/cats", (req, res) => {
   pool.query("SELECT * FROM cats").then((res) => {
+    res.send(data.rows);
+  });
+});
+
+app.get("owners", (req, res) => {
+  pool.query("SELECT * FROM owners").then((res) => {
     res.send(data.rows);
   });
 });
