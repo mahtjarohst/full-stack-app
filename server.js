@@ -16,13 +16,13 @@ const pool = new pg.Pool({
 });
 
 app.get("/cats", (req, res) => {
-  pool.query("SELECT * FROM cats").then((res) => {
+  pool.query("SELECT * FROM cats").then((data) => {
     res.send(data.rows);
   });
 });
 
 app.get("owners", (req, res) => {
-  pool.query("SELECT * FROM owners").then((res) => {
+  pool.query("SELECT * FROM owners").then((data) => {
     res.send(data.rows);
   });
 });
@@ -94,7 +94,7 @@ app.post("/cats/", (req, res) => {
 });
 
 app.get("/owners", (req, res) => {
-  pool.query("SELECT * FROM owners").then((res) => {
+  pool.query("SELECT * FROM owners").then((data) => {
     res.send(data.rows);
   });
 });
