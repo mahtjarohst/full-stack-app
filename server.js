@@ -8,7 +8,7 @@ const { DATABASE_URL, NODE_ENV, PORT } = process.env;
 
 const app = express();
 
-app.use(express.static("static"));
+app.use(express.static("public"));
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -21,7 +21,7 @@ app.get("/cats", (req, res) => {
   });
 });
 
-app.get("owners", (req, res) => {
+app.get("/owners", (req, res) => {
   pool.query("SELECT * FROM owners").then((data) => {
     res.send(data.rows);
   });

@@ -6,7 +6,8 @@ CREATE TABLE cats (
     name TEXT,
     age DEC,
     gender TEXT,
-    color TEXT
+    color TEXT,
+    owner TEXT
 );
 
 CREATE TABLE owners (
@@ -17,10 +18,10 @@ CREATE TABLE owners (
     email TEXT
 );
 
-INSERT INTO cats (name, age, gender, color) VALUES ('Carmel', '4', 'Female', 'Brown');
-INSERT INTO cats (name, age, gender, color) VALUES ('Butters', '1.5', 'Male', 'Black and white');
-INSERT INTO cats (name, age, gender, color) VALUES ('Mi Mow', '12', 'Female', 'Orange');
-INSERT INTO cats (name, age, gender, color) VALUES ('Wrigley', '12', 'Male', 'Grey');
+INSERT INTO cats (name, age, gender, color, owner) VALUES ('Carmel', '4', 'Female', 'Brown', 'Matt');
+INSERT INTO cats (name, age, gender, color, owner) VALUES ('Butters', '1.5', 'Male', 'Black and white', 'Ellie');
+INSERT INTO cats (name, age, gender, color, owner) VALUES ('Mi Mow', '12', 'Female', 'Orange', 'Robert');
+INSERT INTO cats (name, age, gender, color, owner) VALUES ('Wrigley', '12', 'Male', 'Grey', 'Cindy');
 
 INSERT INTO owners (first_name, last_name, avatar, email) VALUES ('Ellie', 'Ritz', 'Crazy Cat Lady', 'crazycatlady@email.com');
 INSERT INTO owners (first_name, last_name, avatar, email) VALUES ('Matt', 'Rust', 'MattCat', 'mattlikescats@email.com');
