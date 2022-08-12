@@ -7,6 +7,7 @@ dotenv.config();
 const { DATABASE_URL, NODE_ENV, PORT } = process.env;
 
 const app = express();
+app.use(express.json());
 
 app.use(express.static("public"));
 
@@ -16,16 +17,11 @@ const pool = new pg.Pool({
 });
 
 app.get("/cats", (req, res) => {
-  pool.query("SELECT * FROM cats").then((data) => {
+  pool.query('SELECT * FROM cats').then((data) => {
     res.send(data.rows);
   });
 });
 
-app.get("/owners", (req, res) => {
-  pool.query("SELECT * FROM owners").then((data) => {
-    res.send(data.rows);
-  });
-});
 
 app.use((err, req, res, next) => {
   res.sendStatus(500);
@@ -33,9 +29,9 @@ app.use((err, req, res, next) => {
 
 app.get("/cats/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  pool.query("SELECT * FROM cats").then((data) => {
+  pool.query('SELECT * FROM cats').then((data) => {
     if (data.rows[id]) {
-      res.send(data.rows[id]);
+      res.send(data.rows[id -1]);
     } else {
       res.sendStatus(404);
     }
@@ -45,7 +41,7 @@ app.get("/cats/:id", (req, res) => {
 app.delete("/cats/:id", (req, res) => {
   const id = req.params.id;
   pool
-    .query("DELETE FROM cats WHERE id = $1 RETURNING *;", [id])
+    .query('DELETE FROM cats WHERE id = $1 RETURNING *;', [id])
     .then((data) => {
       if (data.rows.length === 0) {
         res.sendStatus(404);
@@ -53,61 +49,65 @@ app.delete("/cats/:id", (req, res) => {
         res.sendStatus(204);
       }
     });
-});
-
-app.patch("/cats/:id", (req, res) => {
+  });
+  
+  app.patch("/cats/:id", (req, res) => {
   const { id } = req.params;
-  const { name, age, gender, color, food_type } = req.body;
+  const { name, age, gender, color, owner } = req.body;
   if (Number.isNaN(id)) {
     res.status(400).send(`invalid id "${req.params}`);
   }
   pool
-    .query(
+  .query(
       `
-              UPDATE cats
-              SET name = COALESCE($1, name),
-              age = COALESCE($2, age),
-              gender = COALESCE($3, gender),
+      UPDATE cats
+      SET name = COALESCE($1, name),
+      age = COALESCE($2, age),
+      gender = COALESCE($3, gender),
               color = COALESCE($4, color),
-              food_type = COALESCE($5, food_type)
+              owner = COALESCE($5, owner)
               WHERE id = $6
               RETURNING *;
               `,
-      [name, age, gender, color, food_type, id]
+      [name, age, gender, color, owner, id]
     )
-    .then((result) => {
-      res.send(result.rows[0]);
+    .then((data) => {
+      res.send(data.rows[0]);
     });
-});
-
-app.post("/cats/", (req, res) => {
-  const { age, name, gender, color, food_type } = req.body;
-  pool
-    .query(
-      "INSERT INTO cats (age, name, gender, color, food_type) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [age, name, gender, color, food_type]
-    )
-    .then((result) => {
-      console.log(result.rows);
-      req.send(result.rows[0]);
-    });
-});
-
-app.get("/owners", (req, res) => {
-  pool.query("SELECT * FROM owners").then((data) => {
-    res.send(data.rows);
   });
+  
+  app.post("/cats/", (req, res) => {
+    const { age, name, gender, color, owner } = req.body;
+    pool
+    .query(
+      'INSERT INTO cats (age, name, gender, color, owner) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [age, name, gender, color, owner]
+      )
+      .then((data) => {
+        console.log(data.rows);
+        res.send(data.rows[0]);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(500);
+    });
 });
 
 app.use((err, req, res, next) => {
   res.sendStatus(500);
 });
 
+app.get("/owners", (req, res) => {
+  pool.query('SELECT * FROM owners').then((data) => {
+    res.send(data.rows);
+  });
+});
+
 app.get("/owners/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  pool.query("SELECT * FROM owners").then((data) => {
+  pool.query('SELECT * FROM owners').then((data) => {
     if (data.rows[id]) {
-      res.send(data.rows[id]);
+      res.send(data.rows[id -1]);
     } else {
       res.sendStatus(404);
     }
@@ -117,7 +117,7 @@ app.get("/owners/:id", (req, res) => {
 app.delete("/owners/:id", (req, res) => {
   const id = req.params.id;
   pool
-    .query("DELETE FROM owners WHERE id = $1 RETURNING *;", [id])
+    .query('DELETE FROM owners WHERE id = $1 RETURNING *;', [id])
     .then((data) => {
       if (data.rows.length === 0) {
         res.sendStatus(404);
@@ -146,8 +146,8 @@ app.patch("/owners/:id", (req, res) => {
               `,
       [first_name, last_name, avatar, email, id]
     )
-    .then((result) => {
-      res.send(result.rows[0]);
+    .then((data) => {
+      res.send(data.rows[0]);
     });
 });
 
@@ -155,12 +155,16 @@ app.post("/owners/", (req, res) => {
   const { first_name, last_name, avatar, email } = req.body;
   pool
     .query(
-      "INSERT INTO owners (first_name, last_name, avatar, email) VALUES ($1, $2, $3, $4) RETURNING *",
+      'INSERT INTO owners (first_name, last_name, avatar, email) VALUES ($1, $2, $3, $4) RETURNING *',
       [first_name, last_name, avatar, email]
     )
-    .then((result) => {
-      console.log(result.rows);
-      req.send(result.rows[0]);
+    .then((data) => {
+      console.log(data.rows);
+      res.send(data.rows[0]);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.sendStatus(500);
     });
 });
 
