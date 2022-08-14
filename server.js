@@ -27,16 +27,16 @@ app.use((err, req, res, next) => {
   res.sendStatus(500);
 });
 
-app.get("/cats/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  pool.query('SELECT * FROM cats').then((data) => {
-    if (data.rows[id]) {
-      res.send(data.rows[id -1]);
-    } else {
-      res.sendStatus(404);
-    }
-  });
-});
+app.get('/cats/:id', (req,res, next) => {
+  const id =req.params.id;
+  pool.query('SELECT * FROM cats WHERE id = $1;', [id]).then((data)=> {
+      const cat = data.rows[0];
+      if([0]){
+          res.send([cat]);
+      }
+  })
+  .catch(next)
+})
 
 app.delete("/cats/:id", (req, res) => {
   const id = req.params.id;
@@ -103,16 +103,16 @@ app.get("/owners", (req, res) => {
   });
 });
 
-app.get("/owners/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  pool.query('SELECT * FROM owners').then((data) => {
-    if (data.rows[id]) {
-      res.send(data.rows[id -1]);
-    } else {
-      res.sendStatus(404);
-    }
-  });
-});
+app.get('/owners/:id', (req,res, next) => {
+  const id =req.params.id;
+  pool.query(`SELECT * FROM owners WHERE id = $1;`, [id]).then((data)=> {
+      const owner = data.rows[0];
+      if([0]){
+          res.send(owner);
+      }
+  })
+  .catch(next)
+})
 
 app.delete("/owners/:id", (req, res) => {
   const id = req.params.id;
@@ -166,10 +166,6 @@ app.post("/owners/", (req, res) => {
       console.log(err);
       res.sendStatus(500);
     });
-});
-
-app.use((err, req, res, next) => {
-  res.sendStatus(500);
 });
 
 app.listen(PORT, () => {
